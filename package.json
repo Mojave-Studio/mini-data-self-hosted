@@ -1,0 +1,24 @@
+{
+  "name": "mini-data-self-hosted",
+  "version": "0.1.0",
+  "description": "Provision Cloudflare D1 and R2 for Mini Data — UI stays at minidata.io, data stays in your account.",
+  "type": "module",
+  "private": false,
+  "license": "MIT",
+  "bin": {
+    "minidata-provision": "./scripts/provision.mjs"
+  },
+  "scripts": {
+    "provision": "node scripts/provision.mjs",
+    "register": "node scripts/register.mjs",
+    "deploy": "wrangler deploy",
+    "migrate": "wrangler d1 migrations apply mini_data_db --remote",
+    "migrate:local": "wrangler d1 migrations apply mini_data_db --local"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "wrangler": "^3.70.0"
+  }
+}
