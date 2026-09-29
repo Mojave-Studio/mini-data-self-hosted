@@ -1,14 +1,42 @@
-# Mini Data — Self-Hosted Data Plane
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/logo-dark.png">
+    <img src="assets/logo.png" width="300" alt="Mini Data">
+  </picture>
+</p>
 
-Provision **your own** Cloudflare D1, R2, and data worker while using the Mini Data UI at **[minidata.io](https://minidata.io)**.
+<h1 align="center">Mini Data — Self-Hosted</h1>
 
-This repository is **not** a copy of the Mini Data application. It contains:
+<p align="center">
+  <em>Your data in your Cloudflare account. Our UI at minidata.io. Nobody's mixed up.</em>
+</p>
 
-- Provisioning scripts (`npm run provision`)
-- Database schema migrations (structure only)
-- A minimal data worker deployed to **your** Cloudflare account
+<p align="center">
+  <img src="https://img.shields.io/github/stars/mojavestudio/mini-data-self-hosted?style=flat-square&color=111111" alt="Stars">
+  <img src="https://img.shields.io/badge/license-MIT-111111?style=flat-square" alt="MIT license">
+  <img src="https://img.shields.io/badge/runs%20on-Cloudflare%20Workers-111111?style=flat-square" alt="Cloudflare Workers">
+  <img src="https://img.shields.io/badge/cost-your%20CF%20plan-111111?style=flat-square" alt="Billed by your account">
+</p>
 
-Your UI, auth, and feature updates stay on minidata.io. Your **data never lives in our Cloudflare account**.
+---
+
+One command puts a D1 database, an R2 bucket, and a data worker in **your** Cloudflare account — while the app, auth, and feature updates stay at [minidata.io](https://minidata.io).
+
+```bash
+npm run provision
+```
+
+That's the whole trick. We never store your records; you never fork our UI.
+
+## What this repo is — and isn't
+
+| In the box | Not in the box |
+|------------|----------------|
+| D1 + R2 provisioning (`npm run provision`) | Mini Data UI source code |
+| Schema migrations — structure only | OAuth config — handled at minidata.io |
+| A minimal data worker for your account | Application logic and integrations |
+
+The split keeps every self-hoster on the current UI with zero redeploys, while data-at-rest stays inside your billing and compliance boundary.
 
 ## Architecture
 
@@ -20,20 +48,14 @@ Your UI, auth, and feature updates stay on minidata.io. Your **data never lives 
                             ▼
 ┌─────────────────────────────────────────────────────────────┐
 │  Your Cloudflare account                                    │
-│  • Worker URL (workers.dev or custom domain)                  │
+│  • Worker URL (workers.dev or custom domain)                │
 │  • D1 + optional R2  ← this repo provisions + migrates      │
 └─────────────────────────────────────────────────────────────┘
 ```
 
 ## Quick start
 
-### 1. Prerequisites
-
-- [Node.js 18+](https://nodejs.org/)
-- A [Cloudflare account](https://dash.cloudflare.com/)
-- Wrangler CLI: `npm install` (included as devDependency)
-
-### 2. Install
+Prerequisites: [Node.js 18+](https://nodejs.org/), a [Cloudflare account](https://dash.cloudflare.com/), and three minutes.
 
 ```bash
 git clone https://github.com/mojavestudio/mini-data-self-hosted.git
@@ -41,90 +63,45 @@ cd mini-data-self-hosted
 npm install
 cp .env.example .env
 npx wrangler login
-```
-
-### 3. Provision in **your** account
-
-```bash
 npm run provision
 ```
 
-This will:
+`provision` creates a D1 database (`mini_data_db`), optionally an R2 bucket, applies every schema migration to **your** D1, deploys the data worker, and prints its URL — e.g. `https://minidata-self-hosted-data.<subdomain>.workers.dev`.
 
-1. Create a D1 database (`mini_data_db` by default)
-2. Optionally create an R2 bucket for file storage
-3. Apply schema migrations to **your** D1
-4. Deploy the data worker and print its URL (e.g. `https://minidata-self-hosted-data.your-subdomain.workers.dev`)
-
-### 4. Link to your Mini Data login
-
-Copy the worker URL from the provision output (or `.minidata/data-url.txt`).
-
-**Option A — UI (recommended)**
+Then link it:
 
 1. Sign in at [minidata.io](https://minidata.io)
-2. Go to **Settings → Self-Hosted Data**
-3. Paste your worker URL — either the Cloudflare `*.workers.dev` address or a custom domain
-
-**Option B — CLI**
-
-```bash
-# After signing in at minidata.io, copy your `session` cookie into .env
-npm run register
-```
-
-Or provision and register in one step:
-
-```bash
-npm run provision -- --register
-```
+2. **Settings → Self-Hosted Data** → paste the worker URL
+3. Done. Or `npm run register` with `MINIDATA_SESSION_COOKIE` set if you prefer the CLI.
 
 ### Custom domains
 
-After deploy, you can attach your own hostname in the Cloudflare dashboard:
+Attach a hostname in **Workers → your worker → Settings → Domains & Routes** (e.g. `data.example.com`), then paste that URL in Settings instead. Set `MINIDATA_DATA_URL` in `.env` beforehand if you already know the hostname.
 
-**Workers → your worker → Settings → Domains & Routes**
+## Commands
 
-Examples:
-
-- `https://minidata-data.jess-901.workers.dev` (Cloudflare-assigned)
-- `https://data.mojavestud.io` (your subdomain or apex domain)
-
-Then paste that URL in Mini Data Settings instead of the default `workers.dev` URL.
-
-Set `MINIDATA_DATA_URL=https://data.mojavestud.io` in `.env` before `npm run provision` if you already know the hostname you will use.
-
-## What this repo does **not** include
-
-- Mini Data UI source code
-- OAuth configuration (handled by minidata.io)
-- Application business logic or integrations
-
-Those remain on the hosted platform so you always get the latest features without redeploying an app fork.
+| Command | Description |
+|---------|-------------|
+| `npm run provision` | Create D1/R2, migrate, deploy the worker |
+| `npm run provision -- --no-r2` | Skip R2 bucket creation |
+| `npm run provision -- --register` | Provision and link in one step |
+| `npm run register` | Link an already-deployed worker URL |
+| `npm run migrate` | Re-apply migrations after a schema update |
+| `npm run deploy` | Redeploy the data worker only |
 
 ## Configuration
 
 | Variable | Description |
 |----------|-------------|
 | `MINIDATA_ORIGIN` | Platform URL (default `https://minidata.io`) |
-| `MINIDATA_DATA_URL` | Your worker URL if using a custom domain (optional) |
+| `MINIDATA_DATA_URL` | Your worker URL when using a custom domain |
+| `MINIDATA_SESSION_COOKIE` | Session cookie for CLI register only |
 | `D1_DATABASE_NAME` | D1 database name (default `mini_data_db`) |
 | `R2_BUCKET_NAME` | R2 bucket name (auto-generated if unset) |
-| `MINIDATA_SESSION_COOKIE` | For CLI register only |
 
-## Commands
+## Updating
 
-| Command | Description |
-|---------|-------------|
-| `npm run provision` | Create D1/R2, migrate, deploy worker |
-| `npm run provision -- --no-r2` | Skip R2 bucket creation |
-| `npm run register` | Link worker URL to minidata.io account |
-| `npm run migrate` | Re-apply migrations after platform schema updates |
-| `npm run deploy` | Redeploy the data worker only |
-
-## Updating schema
-
-When Mini Data releases new migrations, pull this repo and run:
+When Mini Data ships new schema migrations:
 
 ```bash
 git pull
@@ -134,10 +111,12 @@ npm run deploy
 
 ## Security
 
-- **Never commit** `.minidata/` or `.env`.
-- Data at rest stays in **your** Cloudflare account under your billing and compliance boundary.
-- minidata.io verifies your worker responds at `/health` before linking.
+- `.env`, `wrangler.toml`, and `.minidata/` are gitignored — **never commit them**
+- No secrets live in this repo; the only credential it ever touches is *your* Cloudflare login via `wrangler`
+- Data at rest stays in your Cloudflare account under your billing and compliance boundary
+- minidata.io verifies the worker at `/health` before linking, and stores only the origin — no paths, no tokens
+- `MINIDATA_SESSION_COOKIE` is optional, used once by `register`, and never written to disk by us
 
 ## License
 
-MIT — provisioning tooling and schema migrations only.
+MIT — provisioning tooling and schema only. The Mini Data platform itself is proprietary.
