@@ -12,7 +12,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/github/stars/mojavestudio/mini-data-self-hosted?style=flat-square&color=111111" alt="Stars">
+  <img src="https://img.shields.io/github/stars/Mojave-Studio/mini-data-self-hosted?style=flat-square&color=111111" alt="Stars">
   <img src="https://img.shields.io/badge/license-MIT-111111?style=flat-square" alt="MIT license">
   <img src="https://img.shields.io/badge/runs%20on-Cloudflare%20Workers-111111?style=flat-square" alt="Cloudflare Workers">
   <img src="https://img.shields.io/badge/cost-your%20CF%20plan-111111?style=flat-square" alt="Billed by your account">
@@ -58,7 +58,7 @@ The split keeps every self-hoster on the current UI with zero redeploys, while d
 Prerequisites: [Node.js 18+](https://nodejs.org/), a [Cloudflare account](https://dash.cloudflare.com/), and three minutes.
 
 ```bash
-git clone https://github.com/mojavestudio/mini-data-self-hosted.git
+git clone https://github.com/Mojave-Studio/mini-data-self-hosted.git
 cd mini-data-self-hosted
 npm install
 cp .env.example .env
